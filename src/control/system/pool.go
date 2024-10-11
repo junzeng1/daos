@@ -117,8 +117,18 @@ func (pss *PoolServiceStorage) TotalSCM() uint64 {
 // by the per-rank NVMe allocation made at creation time.
 func (pss *PoolServiceStorage) TotalNVMe() uint64 {
 	if len(pss.PerRankTierStorage) >= 2 {
+		return uint64(len(pss.CurrentRanks())) * pss.PerRankTierStorage[1]
+	}
+	return 0
+}
+
+// TotalQLC returns the total amount of QLC NVMe storage allocated to
+// the pool, calculated from the current set of ranks multiplied
+// by the per-rank QLC NVMe allocation made at creation time.
+func (pss *PoolServiceStorage) TotalQLC() uint64 {
+	if len(pss.PerRankTierStorage) >= 3 {
 		sum := uint64(0)
-		for _, tierStorage := range pss.PerRankTierStorage[1:] {
+		for _, tierStorage := range pss.PerRankTierStorage[2:] {
 			sum += uint64(len(pss.CurrentRanks())) * tierStorage
 		}
 		return sum
@@ -130,7 +140,8 @@ func (pss *PoolServiceStorage) String() string {
 	if pss == nil {
 		return "no pool storage info available"
 	}
-	return fmt.Sprintf("total SCM: %s, total NVMe: %s",
+	return fmt.Sprintf("total SCM: %s, total NVMe: %s, total QLC: %s",
 		humanize.Bytes(pss.TotalSCM()),
-		humanize.Bytes(pss.TotalNVMe()))
+		humanize.Bytes(pss.TotalNVMe()),
+		humanize.Bytes(pss.TotalQLC()))
 }
