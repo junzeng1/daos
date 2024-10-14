@@ -914,6 +914,12 @@ pool_query_reply_to_info(uuid_t pool_uuid, struct pool_buf *map_buf,
 			 struct daos_pool_space *ps,
 			 struct daos_rebuild_status *rs, daos_pool_info_t *info);
 
+void
+pool_query_reply_to_info_v6(uuid_t pool_uuid, struct pool_buf *map_buf,
+			 uint32_t map_version, uint32_t leader_rank,
+			 struct daos_pool_space_v6 *ps,
+			 struct daos_rebuild_status *rs, daos_pool_info_t *info);
+
 int list_cont_bulk_create(crt_context_t ctx, crt_bulk_t *bulk,
 			  void *buf, daos_size_t ncont);
 void list_cont_bulk_destroy(crt_bulk_t bulk);

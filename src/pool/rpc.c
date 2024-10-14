@@ -382,6 +382,51 @@ pool_query_reply_to_info(uuid_t pool_uuid, struct pool_buf *map_buf,
 		info->pi_rebuild_st	= *rs;
 }
 
+/**
+ * Translates the response from a pool query RPC to a pool_info structure.
+ *
+ * \param[in]		pool_uuid	UUID of the pool
+ * \param[in]		map_buf		Map buffer for pool
+ * \param[in]		map_version	Pool map version
+ * \param[in]		leader_rank	Pool leader rank
+ * \param[in]		ps		Pool space
+ * \param[in]		rs		Rebuild status
+ * @param[in][out]	info		Pool info - pass in with pi_bits set
+ *					Returned populated with inputs
+ */
+void
+pool_query_reply_to_info_v6(uuid_t pool_uuid, struct pool_buf *map_buf,
+			 uint32_t map_version, uint32_t leader_rank,
+			 struct daos_pool_space_v6 *ps,
+			 struct daos_rebuild_status *rs,
+			 daos_pool_info_t *info)
+{
+	D_ASSERT(ps != NULL);
+	D_ASSERT(rs != NULL);
+
+	uuid_copy(info->pi_uuid, pool_uuid);
+	info->pi_ntargets		= map_buf->pb_target_nr;
+	info->pi_nnodes			= map_buf->pb_node_nr;
+	info->pi_map_ver		= map_version;
+	info->pi_leader			= leader_rank;
+	if (info->pi_bits & DPI_SPACE) {
+		info->pi_space.ps_space.s_total[DAOS_MEDIA_SCM]	= ps->ps_space.s_total[DAOS_MEDIA_SCM];
+		info->pi_space.ps_space.s_total[DAOS_MEDIA_NVME] = ps->ps_space.s_total[DAOS_MEDIA_NVME];
+		info->pi_space.ps_space.s_free[DAOS_MEDIA_SCM]	= ps->ps_space.s_free[DAOS_MEDIA_SCM];
+		info->pi_space.ps_space.s_free[DAOS_MEDIA_NVME]	= ps->ps_space.s_free[DAOS_MEDIA_NVME];
+		info->pi_space.ps_free_min[DAOS_MEDIA_SCM] = ps->ps_free_min[DAOS_MEDIA_SCM];
+		info->pi_space.ps_free_min[DAOS_MEDIA_NVME] = ps->ps_free_min[DAOS_MEDIA_NVME];
+		info->pi_space.ps_free_max[DAOS_MEDIA_SCM] = ps->ps_free_max[DAOS_MEDIA_SCM];
+		info->pi_space.ps_free_max[DAOS_MEDIA_NVME] = ps->ps_free_max[DAOS_MEDIA_NVME];
+		info->pi_space.ps_free_mean[DAOS_MEDIA_SCM] = ps->ps_free_mean[DAOS_MEDIA_SCM];
+		info->pi_space.ps_free_mean[DAOS_MEDIA_NVME] = ps->ps_free_mean[DAOS_MEDIA_NVME];
+		info->pi_space.ps_ntargets = ps->ps_ntargets;
+		info->pi_space.ps_padding = ps->ps_padding;
+	}
+	if (info->pi_bits & DPI_REBUILD_STATUS)
+		info->pi_rebuild_st	= *rs;
+}
+
 int
 list_cont_bulk_create(crt_context_t ctx, crt_bulk_t *bulk,
 		      void *buf, daos_size_t buf_nbytes)
